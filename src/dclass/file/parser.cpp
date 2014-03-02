@@ -625,10 +625,10 @@ static const yytype_uint16 yyrline[] =
     1095,  1096,  1097,  1101,  1102,  1103,  1107,  1119,  1123,  1136,
     1137,  1138,  1142,  1154,  1158,  1173,  1188,  1203,  1240,  1274,
     1275,  1280,  1279,  1321,  1322,  1330,  1329,  1371,  1372,  1373,
-    1377,  1384,  1429,  1428,  1501,  1503,  1502,  1523,  1528,  1550,
-    1572,  1594,  1650,  1710,  1711,  1715,  1716,  1720,  1721,  1722,
-    1723,  1724,  1725,  1726,  1727,  1728,  1729,  1730,  1734,  1738,
-    1751
+    1377,  1384,  1429,  1428,  1502,  1504,  1503,  1524,  1529,  1551,
+    1573,  1595,  1652,  1713,  1714,  1718,  1719,  1723,  1724,  1725,
+    1726,  1727,  1728,  1729,  1730,  1731,  1732,  1733,  1737,  1741,
+    1754
 };
 #endif
 
@@ -3304,6 +3304,7 @@ yyreduce:
 			if(array->get_array_size() == 0)
 			{
 				sizetag_t length = (yyvsp[(3) - (4)].str).length();
+				length = swap_le(length);
 				(yyval.str) = string((char*)&length, sizeof(sizetag_t)) + (yyvsp[(3) - (4)].str);
 			}
 			else
@@ -3320,7 +3321,7 @@ yyreduce:
   case 145:
 
 /* Line 1464 of yacc.c  */
-#line 1503 "parser.ypp"
+#line 1504 "parser.ypp"
     {
 		// We popped off the only element we added, so we're back to the array
 		// Don't increment the depth; the array_expansion will add to
@@ -3339,7 +3340,7 @@ yyreduce:
   case 146:
 
 /* Line 1464 of yacc.c  */
-#line 1517 "parser.ypp"
+#line 1518 "parser.ypp"
     {
 		(yyval.str) = (yyvsp[(1) - (4)].str) + (yyvsp[(4) - (4)].str);
 	;}
@@ -3348,7 +3349,7 @@ yyreduce:
   case 147:
 
 /* Line 1464 of yacc.c  */
-#line 1524 "parser.ypp"
+#line 1525 "parser.ypp"
     {
 		current_depth++;
 		(yyval.str) = (yyvsp[(1) - (1)].str);
@@ -3358,7 +3359,7 @@ yyreduce:
   case 148:
 
 /* Line 1464 of yacc.c  */
-#line 1529 "parser.ypp"
+#line 1530 "parser.ypp"
     {
 		const DistributedType* dtype = type_stack.top().type;
 		if(dtype == (DistributedType*)NULL)
@@ -3385,7 +3386,7 @@ yyreduce:
   case 149:
 
 /* Line 1464 of yacc.c  */
-#line 1551 "parser.ypp"
+#line 1552 "parser.ypp"
     {
 		const DistributedType* dtype = type_stack.top().type;
 		if(dtype == (DistributedType*)NULL)
@@ -3412,7 +3413,7 @@ yyreduce:
   case 150:
 
 /* Line 1464 of yacc.c  */
-#line 1573 "parser.ypp"
+#line 1574 "parser.ypp"
     {
 		const DistributedType* dtype = type_stack.top().type;
 		if(dtype == (DistributedType*)NULL)
@@ -3439,7 +3440,7 @@ yyreduce:
   case 151:
 
 /* Line 1464 of yacc.c  */
-#line 1595 "parser.ypp"
+#line 1596 "parser.ypp"
     {
 		const DistributedType* dtype = type_stack.top().type;
 		if(dtype == (DistributedType*)NULL)
@@ -3471,6 +3472,7 @@ yyreduce:
 			// TODO: Check for range limits
 			// Prepend length tag
 			sizetag_t length = (yyvsp[(1) - (3)].str).length();
+			length = swap_le(length);
 			string base = string((char*)&length, sizeof(sizetag_t)) + (yyvsp[(1) - (3)].str);
 
 			string val;
@@ -3500,7 +3502,7 @@ yyreduce:
   case 152:
 
 /* Line 1464 of yacc.c  */
-#line 1651 "parser.ypp"
+#line 1653 "parser.ypp"
     {
 		const DistributedType* dtype = type_stack.top().type;
 		if(dtype == (DistributedType*)NULL)
@@ -3532,6 +3534,7 @@ yyreduce:
 			// TODO: Check for range limits
 			// Prepend length tag
 			sizetag_t length = (yyvsp[(1) - (3)].str).length();
+			length = swap_le(length);
 			string base = string((char*)&length, sizeof(sizetag_t)) + (yyvsp[(1) - (3)].str);
 
 			string val;
@@ -3562,112 +3565,112 @@ yyreduce:
   case 153:
 
 /* Line 1464 of yacc.c  */
-#line 1710 "parser.ypp"
+#line 1713 "parser.ypp"
     { (yyval.u.int64) = (yyvsp[(2) - (2)].u.uint64); ;}
     break;
 
   case 154:
 
 /* Line 1464 of yacc.c  */
-#line 1711 "parser.ypp"
+#line 1714 "parser.ypp"
     { (yyval.u.int64) = -(yyvsp[(2) - (2)].u.uint64); ;}
     break;
 
   case 155:
 
 /* Line 1464 of yacc.c  */
-#line 1715 "parser.ypp"
+#line 1718 "parser.ypp"
     { (yyval.u.type) = T_STRING; ;}
     break;
 
   case 156:
 
 /* Line 1464 of yacc.c  */
-#line 1716 "parser.ypp"
+#line 1719 "parser.ypp"
     { (yyval.u.type) = T_BLOB; ;}
     break;
 
   case 157:
 
 /* Line 1464 of yacc.c  */
-#line 1720 "parser.ypp"
+#line 1723 "parser.ypp"
     { (yyval.u.type) = T_CHAR; ;}
     break;
 
   case 158:
 
 /* Line 1464 of yacc.c  */
-#line 1721 "parser.ypp"
+#line 1724 "parser.ypp"
     { (yyval.u.type) = T_INT8; ;}
     break;
 
   case 159:
 
 /* Line 1464 of yacc.c  */
-#line 1722 "parser.ypp"
+#line 1725 "parser.ypp"
     { (yyval.u.type) = T_INT16; ;}
     break;
 
   case 160:
 
 /* Line 1464 of yacc.c  */
-#line 1723 "parser.ypp"
+#line 1726 "parser.ypp"
     { (yyval.u.type) = T_INT32; ;}
     break;
 
   case 161:
 
 /* Line 1464 of yacc.c  */
-#line 1724 "parser.ypp"
+#line 1727 "parser.ypp"
     { (yyval.u.type) = T_INT64; ;}
     break;
 
   case 162:
 
 /* Line 1464 of yacc.c  */
-#line 1725 "parser.ypp"
+#line 1728 "parser.ypp"
     { (yyval.u.type) = T_UINT8; ;}
     break;
 
   case 163:
 
 /* Line 1464 of yacc.c  */
-#line 1726 "parser.ypp"
+#line 1729 "parser.ypp"
     { (yyval.u.type) = T_UINT16; ;}
     break;
 
   case 164:
 
 /* Line 1464 of yacc.c  */
-#line 1727 "parser.ypp"
+#line 1730 "parser.ypp"
     { (yyval.u.type) = T_UINT32; ;}
     break;
 
   case 165:
 
 /* Line 1464 of yacc.c  */
-#line 1728 "parser.ypp"
+#line 1731 "parser.ypp"
     { (yyval.u.type) = T_UINT64; ;}
     break;
 
   case 166:
 
 /* Line 1464 of yacc.c  */
-#line 1729 "parser.ypp"
+#line 1732 "parser.ypp"
     { (yyval.u.type) = T_FLOAT32; ;}
     break;
 
   case 167:
 
 /* Line 1464 of yacc.c  */
-#line 1730 "parser.ypp"
+#line 1733 "parser.ypp"
     { (yyval.u.type) = T_FLOAT64; ;}
     break;
 
   case 168:
 
 /* Line 1464 of yacc.c  */
-#line 1735 "parser.ypp"
+#line 1738 "parser.ypp"
     {
 		(yyval.strings) = vector<string>();
 	;}
@@ -3676,7 +3679,7 @@ yyreduce:
   case 169:
 
 /* Line 1464 of yacc.c  */
-#line 1739 "parser.ypp"
+#line 1742 "parser.ypp"
     {
 		if(!parsed_file->has_keyword((yyvsp[(2) - (2)].str)))
 		{
@@ -3692,7 +3695,7 @@ yyreduce:
 
 
 /* Line 1464 of yacc.c  */
-#line 3696 "parser.cpp"
+#line 3699 "parser.cpp"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -3904,7 +3907,7 @@ yyreturn:
 
 
 /* Line 1684 of yacc.c  */
-#line 1755 "parser.ypp"
+#line 1758 "parser.ypp"
  /* Start helper function section */
 
 

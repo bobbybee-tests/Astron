@@ -1484,6 +1484,7 @@ array_value
 			if(array->get_array_size() == 0)
 			{
 				sizetag_t length = $3.length();
+				length = swap_le(length);
 				$$ = string((char*)&length, sizeof(sizetag_t)) + $3;
 			}
 			else
@@ -1623,6 +1624,7 @@ array_expansion
 			// TODO: Check for range limits
 			// Prepend length tag
 			sizetag_t length = $1.length();
+			length = swap_le(length);
 			string base = string((char*)&length, sizeof(sizetag_t)) + $1;
 
 			string val;
@@ -1679,6 +1681,7 @@ array_expansion
 			// TODO: Check for range limits
 			// Prepend length tag
 			sizetag_t length = $1.length();
+			length = swap_le(length);
 			string base = string((char*)&length, sizeof(sizetag_t)) + $1;
 
 			string val;

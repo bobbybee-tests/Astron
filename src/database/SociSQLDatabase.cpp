@@ -3,17 +3,17 @@
 #include "DatabaseServer.h"
 
 #include "core/global.h"
-#include "dclass/value/parse.h"
-#include "dclass/value/format.h"
-#include "dclass/dc/Class.h"
-#include "dclass/dc/Field.h"
+#include <bamboo/dcfile/format.h>
+#include <bamboo/dcfile/parse.h>
+#include <bamboo/module/Class.h>
+#include <bamboo/module/Field.h>
 
 #include <soci.h>
 #include <boost/icl/interval_set.hpp>
 
 using namespace std;
 using namespace soci;
-using namespace dclass;
+using namespace bamboo;
 
 typedef boost::icl::discrete_interval<doid_t> interval_t;
 typedef boost::icl::interval_set<doid_t> set_t;
@@ -234,18 +234,18 @@ class SociSQLDatabase : public DatabaseBackend
 			if(ind != i_null)
 			{
 				bool parse_err;
-				string packed_data = parse_value(field->get_type(), val, parse_err);
+				std::vector<uint8_t> packed = parse_dcvalue(field->get_type(), val, parse_err);
 				if(parse_err)
 				{
 					m_log->error() << "Failed parsing value for field '" << field->get_name()
 					               << "' of object " << do_id << "' from database.\n";
 					return false;
 				}
-				value = vector<uint8_t>(packed_data.begin(), packed_data.end());
+				value = packed;
 				return false;
 			}
 
-			val = format_value(field->get_type(), value);
+			val = format_dcvalue(field->get_type(), value);
 			m_sql << "UPDATE fields_" << dcc->get_name() << " SET " << field->get_name()
 			      << "='" << val << "' WHERE object_id=" << do_id << ";";
 			return true;
@@ -284,18 +284,18 @@ class SociSQLDatabase : public DatabaseBackend
 						{
 							bool parse_err;
 							failed = true;
-							string packed_data = parse_value(field->get_type(), value, parse_err);
+							std::vector<uint8_t> packed = parse_dcvalue(field->get_type(), value, parse_err);
 							if(parse_err)
 							{
 								m_log->error() << "Failed parsing value for field '" << field->get_name()
 								               << "' of object " << do_id << "' from database.\n";
 								continue;
 							}
-							values[field] = vector<uint8_t>(packed_data.begin(), packed_data.end());
+							values[field] = packed;
 							continue;
 						}
 
-						value = format_value(it->first->get_type(), it->second);
+						value = format_dcvalue(it->first->get_type(), it->second);
 						m_sql << "UPDATE fields_" << dcc->get_name() << " SET " << field->get_name()
 						      << "='" << value << "' WHERE object_id=" << do_id << ";";
 					}
@@ -348,22 +348,22 @@ class SociSQLDatabase : public DatabaseBackend
 				return false;
 			}
 
-			string eql = format_value(field->get_type(), equal);
+			string eql = format_dcvalue(field->get_type(), equal);
 			if(val != eql)
 			{
 				bool parse_err;
-				val = parse_value(field->get_type(), val, parse_err);
+				vector<uint8_t> packed = parse_dcvalue(field->get_type(), val, parse_err);
 				if(parse_err)
 				{
 					m_log->error() << "Failed parsing value for field '" << field->get_name()
 					               << "' of object " << do_id << "' from database.\n";
 					return false;
 				}
-				value = vector<uint8_t>(val.begin(), val.end());
+				value = packed;
 				return false;
 			}
 
-			val = format_value(field->get_type(), value);
+			val = format_dcvalue(field->get_type(), value);
 			m_sql << "UPDATE fields_" << dcc->get_name() << " SET " << field->get_name()
 			      << "='" << val << "' WHERE object_id=" << do_id << ";";
 			return true;
@@ -404,10 +404,10 @@ class SociSQLDatabase : public DatabaseBackend
 							continue;
 						}
 
-						string equal = format_value(field->get_type(), it->second);
+						string equal = format_dcvalue(field->get_type(), it->second);
 						if(value == equal)
 						{
-							string insert = format_value(field->get_type(), values[field]);
+							string insert = format_dcvalue(field->get_type(), values[field]);
 							m_sql << "UPDATE fields_" << dcc->get_name() << " SET " << field->get_name()
 							      << "='" << insert << "' WHERE object_id=" << do_id << ";";
 						}
@@ -417,7 +417,7 @@ class SociSQLDatabase : public DatabaseBackend
 						}
 
 						bool parse_err;
-						value = parse_value(field->get_type(), value, parse_err);
+						vector<uint8_t> packed = parse_dcvalue(field->get_type(), value, parse_err);
 						if(parse_err)
 						{
 							m_log->error() << "Failed parsing value for field '" << field->get_name()
@@ -719,14 +719,14 @@ class SociSQLDatabase : public DatabaseBackend
 					if(ind == i_ok)
 					{
 						bool parse_err;
-						string packed_data = parse_value(field->get_type(), value, parse_err);
+						vector<uint8_t> packed = parse_dcvalue(field->get_type(), value, parse_err);
 						if(parse_err)
 						{
 							m_log->error() << "Failed parsing value for field '" << field->get_name()
 							               << "' of object " << id << "' from database.\n";
 							continue;
 						}
-						fields[field] = vector<uint8_t>(packed_data.begin(), packed_data.end());
+						fields[field] = packed;
 					}
 				}
 			}
@@ -748,14 +748,14 @@ class SociSQLDatabase : public DatabaseBackend
 					if(ind == i_ok)
 					{
 						bool parse_err;
-						string packed_data = parse_value(field->get_type(), value, parse_err);
+						vector<uint8_t> packed = parse_dcvalue(field->get_type(), value, parse_err);
 						if(parse_err)
 						{
 							m_log->error() << "Failed parsing value for field '" << field->get_name()
 							               << "' of object " << id << "' from database.\n";
 							continue;
 						}
-						values[field] = vector<uint8_t>(packed_data.begin(), packed_data.end());
+						values[field] = packed;
 					}
 				}
 			}
@@ -770,7 +770,7 @@ class SociSQLDatabase : public DatabaseBackend
 				if(it->first->has_keyword("db"))
 				{
 					name = it->first->get_name();
-					value = format_value(it->first->get_type(), it->second);
+					value = format_dcvalue(it->first->get_type(), it->second);
 					m_sql << "UPDATE fields_" << dcc->get_name() << " SET " << name << "='" << value
 					      << "' WHERE object_id=" << id << ";";
 				}

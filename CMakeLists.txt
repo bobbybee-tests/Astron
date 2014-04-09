@@ -16,7 +16,6 @@ endif()
 ### Configure CMake to use our extra Find modules ###
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
-
 ### Define extra windows defines ###
 if(WIN32)
 	add_definitions(-D_WIN32_WINDOWS)
@@ -146,10 +145,15 @@ add_definitions(
 )
 
 set(USE_32BIT_DATAGRAMS OFF CACHE BOOL
-	"If on, datagrams and dclass fields will use 32-bit length tags instead of 16-bit.")
+	"If on, datagrams and distributed fields will use 32-bit length tags instead of 16-bit.")
 if(USE_32BIT_DATAGRAMS)
 	add_definitions(-DASTRON_32BIT_DATAGRAMS)
 	add_definitions(-DDCLASS_32BIT_SIZETAG)
+	find_package(Bamboo32 REQUIRED)
+	set(LIB_BAMBOO ${BAMBOO32_LIBRARIES})
+else()
+	find_package(Bamboo REQUIRED)
+	set(LIB_BAMBOO ${BAMBOO_LIBRARIES})
 endif()
 set(USE_128BIT_CHANNELS OFF CACHE BOOL
 	"If on, channels will be 128-bit and doids and zones will be 64-bit (instead of 64/32).")
@@ -157,7 +161,7 @@ if(USE_128BIT_CHANNELS)
 	add_definitions(-DASTRON_128BIT_CHANNELS)
 endif()
 
-set(BUILD_TESTS OFF CACHE BOOL "If set to true, test files will be compiled in")
+set(BUILD_TESTS OFF CACHE BgOOL "If set to true, test files will be compiled in")
 if(BUILD_TESTS)
 	set(TEST_FILES
 		src/tests/MDParticipantTest.cpp
@@ -401,10 +405,7 @@ endif()
 #endforeach(sourcefile)
 #source_group("Header Files" FILES ${ASTROND_HEADERS})
 
-add_subdirectory(src/dclass)
-
-add_dependencies(astrond dclass)
-target_link_libraries(astrond dclass ${YAMLCPP_LIBNAME} ${Boost_LIBRARIES} ${SOCI_LIBRARY_NAMES})
+target_link_libraries(astrond ${LIB_BAMBOO} ${YAMLCPP_LIBNAME} ${Boost_LIBRARIES} ${SOCI_LIBRARY_NAMES})
 
 ### Handle some final testing configuration ###
 if(USE_32BIT_DATAGRAMS)

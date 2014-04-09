@@ -7,8 +7,8 @@
 #include "DatabaseBackend.h"
 
 using namespace std;
-using dclass::Field;
-using dclass::Class;
+using bamboo::Field;
+using bamboo::Class;
 
 static RoleFactoryItem<DatabaseServer> dbserver_fact("database");
 
@@ -98,12 +98,12 @@ void DatabaseServer::handle_datagram(DatagramHandle, DatagramIterator &dgi)
 					{
 						if(field->has_keyword("db"))
 						{
-							dgi.unpack_field(field, dbo.fields[field]);
+							dgi.read_packed(field->get_type(), dbo.fields[field]);
 						}
 						else
 						{
 							m_log->warning() << "Recieved non-db field in create_object.\n";
-							dgi.skip_field(field);
+							dgi.skip_type(field->get_type());
 						}
 					}
 				}
@@ -228,7 +228,7 @@ void DatabaseServer::handle_datagram(DatagramHandle, DatagramIterator &dgi)
 
 			// Update the field value
 			vector<uint8_t> value;
-			dgi.unpack_field(field, value);
+			dgi.read_packed(field->get_type(), value);
 			m_db_backend->set_field(do_id, field, value);
 
 			// Broadcast update to object's channel
@@ -267,11 +267,11 @@ void DatabaseServer::handle_datagram(DatagramHandle, DatagramIterator &dgi)
 					{
 						if(field->has_keyword("db"))
 						{
-							dgi.unpack_field(field, fields[field]);
+							dgi.read_packed(field->get_type(), fields[field]);
 						}
 						else
 						{
-							dgi.skip_field(field);
+							dgi.skip_type(field->get_type());
 						}
 					}
 				}
@@ -333,7 +333,7 @@ void DatabaseServer::handle_datagram(DatagramHandle, DatagramIterator &dgi)
 
 			// Try to set the field
 			vector<uint8_t> value;
-			dgi.unpack_field(field, value);
+			dgi.read_packed(field->get_type(), value);
 			if(m_db_backend->set_field_if_empty(do_id, field, value))
 			{
 				// Update was successful, send reply
@@ -395,8 +395,8 @@ void DatabaseServer::handle_datagram(DatagramHandle, DatagramIterator &dgi)
 
 			vector<uint8_t> equal;
 			vector<uint8_t> value;
-			dgi.unpack_field(field, equal);
-			dgi.unpack_field(field, value);
+			dgi.read_packed(field->get_type(), equal);
+			dgi.read_packed(field->get_type(), value);
 
 			// Try to set the field
 			if(m_db_backend->set_field_if_equals(do_id, field, equal, value))
@@ -468,8 +468,8 @@ void DatabaseServer::handle_datagram(DatagramHandle, DatagramIterator &dgi)
 						if(field->has_keyword("db"))
 						{
 							ordered.push_back(field);
-							dgi.unpack_field(field, equals[field]);
-							dgi.unpack_field(field, values[field]);
+							dgi.read_packed(field->get_type(), equals[field]);
+							dgi.read_packed(field->get_type(), values[field]);
 						}
 						else
 						{

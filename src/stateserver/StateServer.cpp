@@ -1,14 +1,14 @@
 #include "core/global.h"
 #include "core/msgtypes.h"
 #include "config/constraints.h"
-#include "dclass/dc/Class.h"
+#include <bamboo/module/Class.h>
 #include <exception>
 #include <stdexcept>
 
 #include "DistributedObject.h"
 #include "StateServer.h"
 
-using dclass::Class;
+using bamboo::Class;
 
 static RoleConfigGroup stateserver_config("stateserver");
 static ConfigVariable<channel_t> control_channel("control", INVALID_CHANNEL, stateserver_config);

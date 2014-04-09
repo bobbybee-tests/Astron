@@ -4,7 +4,7 @@
 #include "core/global.h"
 #include "core/RoleFactory.h"
 #include "config/constraints.h"
-#include "dclass/file/hash.h"
+#include <bamboo/traits/hashes.h>
 #include <boost/bind.hpp>
 using boost::asio::ip::tcp;
 using namespace std;
@@ -58,7 +58,7 @@ ClientAgent::ClientAgent(RoleConfig roleconfig) : Role(roleconfig), m_acceptor(N
 	}
 	else
 	{
-		m_hash = dclass::legacy_hash(g_dcf);
+		m_hash = bamboo::legacy_hash(g_dcf);
 	}
 
 	//Initialize the network

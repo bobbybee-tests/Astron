@@ -1,14 +1,14 @@
 #include "core/global.h"
 #include "core/msgtypes.h"
-#include "dclass/dc/Class.h"
-#include "dclass/dc/Field.h"
-#include "dclass/dc/MolecularField.h"
+#include <bamboo/module/Class.h>
+#include <bamboo/module/Field.h>
+#include <bamboo/module/MolecularField.h>
 
 #include "DistributedObject.h"
 
-using dclass::Class;
-using dclass::Field;
-using dclass::MolecularField;
+using bamboo::Class;
+using bamboo::Field;
+using bamboo::MolecularField;
 
 DistributedObject::DistributedObject(StateServer *stateserver, doid_t do_id, doid_t parent_id,
                                      zone_t zone_id, const Class *dclass, DatagramIterator &dgi,
@@ -27,7 +27,7 @@ DistributedObject::DistributedObject(StateServer *stateserver, doid_t do_id, doi
 		const Field *field = m_dclass->get_field(i);
 		if(field->has_keyword("required") && !field->as_molecular())
 		{
-			dgi.unpack_field(field, m_required_fields[field]);
+			dgi.read_packed(field->get_type(), m_required_fields[field]);
 		}
 	}
 
@@ -40,7 +40,7 @@ DistributedObject::DistributedObject(StateServer *stateserver, doid_t do_id, doi
 			const Field *field = m_dclass->get_field_by_id(field_id);
 			if(field->has_keyword("ram"))
 			{
-				dgi.unpack_field(field, m_ram_fields[field]);
+				dgi.read_packed(field->get_type(), m_ram_fields[field]);
 			}
 			else
 			{
@@ -380,11 +380,11 @@ bool DistributedObject::handle_one_update(DatagramIterator &dgi, channel_t sende
 
 	m_log->trace() << "Handling update for '" << field->get_name() << "'." << std::endl;
 
-	dgsize_t field_start = dgi.tell();
+	sizetag_t field_start = dgi.tell();
 
 	try
 	{
-		dgi.unpack_field(field, data);
+		dgi.read_packed(field->get_type(), data);
 	}
 	catch(std::exception&)
 	{
@@ -402,7 +402,7 @@ bool DistributedObject::handle_one_update(DatagramIterator &dgi, channel_t sende
 		{
 			std::vector<uint8_t> field_data;
 			const Field *atomic = molecular->get_field(i);
-			dgi.unpack_field(atomic, field_data);
+			dgi.read_packed(atomic->get_type(), field_data);
 			save_field(atomic, field_data);
 		}
 	}

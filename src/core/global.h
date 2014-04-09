@@ -1,7 +1,7 @@
 #pragma once
 #include "Logger.h"
 #include "config/ConfigVariable.h"
-#include "dclass/dc/File.h"
+#include <bamboo/module/Module.h>
 #include "util/EventSender.h"
 #include <boost/asio.hpp>
 #include <unordered_map>
@@ -13,11 +13,11 @@
 struct Uberdog
 {
 	doid_t do_id;
-	const dclass::Class *dcc;
+	const bamboo::Class *dcc;
 	bool anonymous;
 };
 
-extern const dclass::File *g_dcf;
+extern const bamboo::Module *g_dcf;
 extern Logger *g_logger;
 extern ConfigFile *g_config;
 extern EventSender g_eventsender;

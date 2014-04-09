@@ -8,11 +8,11 @@ class DistributedObject : public MDParticipantInterface
 
 	public:
 		DistributedObject(StateServer *stateserver, doid_t do_id, doid_t parent_id, zone_t zone_id,
-		                  const dclass::Class *dclass, DatagramIterator &dgi, bool has_other);
+		                  const bamboo::Class *dclass, DatagramIterator &dgi, bool has_other);
 		DistributedObject(StateServer *stateserver, channel_t sender, doid_t do_id,
-		                  doid_t parent_id, zone_t zone_id, const dclass::Class *dclass,
-		                  std::unordered_map<const dclass::Field*, std::vector<uint8_t> > req_fields,
-		                  std::map<const dclass::Field*, std::vector<uint8_t> > ram_fields);
+		                  doid_t parent_id, zone_t zone_id, const bamboo::Class *dclass,
+		                  std::unordered_map<const bamboo::Field*, std::vector<uint8_t> > req_fields,
+		                  std::map<const bamboo::Field*, std::vector<uint8_t> > ram_fields);
 		~DistributedObject();
 
 		virtual void handle_datagram(DatagramHandle in_dg, DatagramIterator &dgi);
@@ -47,9 +47,9 @@ class DistributedObject : public MDParticipantInterface
 		doid_t m_do_id;
 		doid_t m_parent_id;
 		zone_t m_zone_id;
-		const dclass::Class *m_dclass;
-		std::unordered_map<const dclass::Field*, std::vector<uint8_t> > m_required_fields;
-		std::map<const dclass::Field*, std::vector<uint8_t> > m_ram_fields;
+		const bamboo::Class *m_dclass;
+		std::unordered_map<const bamboo::Field*, std::vector<uint8_t> > m_required_fields;
+		std::map<const bamboo::Field*, std::vector<uint8_t> > m_ram_fields;
 		channel_t m_ai_channel;
 		channel_t m_owner_channel;
 		bool m_ai_explicitly_set;
@@ -73,7 +73,7 @@ class DistributedObject : public MDParticipantInterface
 
 		void wake_children(); // ask all children for their locations
 
-		void save_field(const dclass::Field *field, const std::vector<uint8_t> &data);
+		void save_field(const bamboo::Field *field, const std::vector<uint8_t> &data);
 		bool handle_one_update(DatagramIterator &dgi, channel_t sender);
 		bool handle_one_get(DatagramPtr out, uint16_t field_id,
 		                    bool succeed_if_unset = false, bool is_subfield = false);

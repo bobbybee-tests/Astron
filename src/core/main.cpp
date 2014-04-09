@@ -1,9 +1,9 @@
 #include "global.h"
 #include "RoleFactory.h"
 #include "config/constraints.h"
-#include "dclass/file/read.h"
-#include "dclass/dc/Class.h"
-using dclass::Class;
+#include <bamboo/dcfile/parse.h>
+#include <bamboo/module/Class.h>
+using bamboo::Class;
 
 #include <boost/filesystem.hpp>
 #include <cstring>
@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	dclass::File* dcf = new dclass::File();
+	bamboo::Module* dcf = new bamboo::Module();
 	dcf->add_keyword("required");
 	dcf->add_keyword("ram");
 	dcf->add_keyword("db");
@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
 	vector<string> dc_file_names = dc_files.get_val();
 	for(auto it = dc_file_names.begin(); it != dc_file_names.end(); ++it)
 	{
-		bool ok = dclass::append(dcf, *it);
+		bool ok = bamboo::parse_dcfile(dcf, *it);
 		if(!ok)
 		{
 			mainlog.fatal() << "Could not read DC file " << *it << endl;

@@ -47,8 +47,8 @@ class NetworkClient
 
 	private:
 
-		uint8_t m_size_buf[sizeof(dgsize_t)];
+		uint8_t m_size_buf[sizeof(sizetag_t)];
 		uint8_t* m_data_buf;
-		dgsize_t m_data_size;
+		sizetag_t m_data_size;
 		bool m_is_data;
 };

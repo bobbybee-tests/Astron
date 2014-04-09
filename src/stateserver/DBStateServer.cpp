@@ -1,15 +1,15 @@
 #include "core/global.h"
 #include "core/msgtypes.h"
 #include "config/constraints.h"
-#include "dclass/dc/Class.h"
-#include "dclass/dc/Field.h"
+#include <bamboo/module/Class.h>
+#include <bamboo/module/Field.h>
 #include <unordered_set>
 
 #include "DBStateServer.h"
 #include "LoadingObject.h"
 
-using dclass::Class;
-using dclass::Field;
+using bamboo::Class;
+using bamboo::Field;
 
 static RoleFactoryItem<DBStateServer> dbss_fact("dbss");
 
@@ -282,11 +282,11 @@ void DBStateServer::handle_set_fields(DatagramIterator &dgi)
 		}
 		if(field->has_keyword("db"))
 		{
-			dgi.unpack_field(field, db_fields[field]);
+			dgi.read_packed(field->get_type(), db_fields[field]);
 		}
 		else
 		{
-			dgi.skip_field(field);
+			dgi.skip_type(field->get_type());
 		}
 	}
 
@@ -353,7 +353,7 @@ void DBStateServer::handle_get_field(channel_t sender, DatagramIterator &dgi)
 		dg->add_uint32(r_context);
 		dg->add_bool(true);
 		dg->add_uint16(field_id);
-		dg->add_data(field->get_default_value());
+		dg->add_value(field->get_type(), field->get_default_value());
 		route_datagram(dg);
 	}
 	else
@@ -455,8 +455,9 @@ void DBStateServer::handle_get_fields(channel_t sender, DatagramIterator &dgi)
 		m_context_datagrams[db_context]->add_uint16(ram_fields.size() + db_fields.size());
 		for(auto it = ram_fields.begin(); it != ram_fields.end(); ++it)
 		{
-			m_context_datagrams[db_context]->add_uint16((*it)->get_id());
-			m_context_datagrams[db_context]->add_data((*it)->get_default_value());
+			const Field *field = *it;
+			m_context_datagrams[db_context]->add_uint16(field->get_id());
+			m_context_datagrams[db_context]->add_value(field->get_type(), field->get_default_value());
 		}
 
 		// Send query to database
@@ -478,8 +479,9 @@ void DBStateServer::handle_get_fields(channel_t sender, DatagramIterator &dgi)
 		dg->add_uint16(ram_fields.size());
 		for(auto it = ram_fields.begin(); it != ram_fields.end(); ++it)
 		{
-			dg->add_uint16((*it)->get_id());
-			dg->add_data((*it)->get_default_value());
+			const Field *field = *it;
+			dg->add_uint16(field->get_id());
+			dg->add_value(field->get_type(), field->get_default_value());
 		}
 		route_datagram(dg);
 	}
@@ -642,7 +644,7 @@ void DBStateServer::handle_get_all_resp(DatagramIterator& dgi)
 			}
 			else
 			{
-				dg->add_data(field->get_default_value());
+				dg->add_value(field->get_type(), field->get_default_value());
 			}
 		}
 	}
@@ -696,15 +698,15 @@ bool unpack_db_fields(DatagramIterator &dgi, const Class* dc_class,
 		}
 		if(field->has_keyword("ram"))
 		{
-			dgi.unpack_field(field, ram[field]);
+			dgi.read_packed(field->get_type(), ram[field]);
 		}
 		else if(field->has_keyword("required"))
 		{
-			dgi.unpack_field(field, required[field]);
+			dgi.read_packed(field->get_type(), required[field]);
 		}
 		else
 		{
-			dgi.skip_field(field);
+			dgi.skip_type(field->get_type());
 		}
 	}
 

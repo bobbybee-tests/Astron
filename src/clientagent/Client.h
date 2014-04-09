@@ -23,7 +23,7 @@ enum ClientState
 struct DeclaredObject
 {
 	doid_t id;
-	const dclass::Class *dcc;
+	const bamboo::Class *dcc;
 };
 
 // A VisibleObject is used to cache metadata associated with
@@ -110,7 +110,7 @@ class Client : public MDParticipantInterface
 
 		// lookup_object returns the class of the object with a do_id.
 		// If that object is not visible to the client, NULL will be returned instead.
-		const dclass::Class* lookup_object(doid_t do_id);
+		const bamboo::Class* lookup_object(doid_t do_id);
 
 		// lookup_interests returns a list of all the interests that a parent-zone pair is visible to.
 		std::list<Interest> lookup_interests(doid_t parent_id, zone_t zone_id);

@@ -1,12 +1,12 @@
 #include "core/global.h"
 #include "core/msgtypes.h"
-#include "dclass/dc/Class.h"
-#include "dclass/dc/Field.h"
+#include <bamboo/module/Class.h>
+#include <bamboo/module/Field.h>
 
 #include "LoadingObject.h"
 
-using dclass::Class;
-using dclass::Field;
+using bamboo::Class;
+using bamboo::Field;
 
 LoadingObject::LoadingObject(DBStateServer *stateserver, doid_t do_id,
                              doid_t parent_id, zone_t zone_id,

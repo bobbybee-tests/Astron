@@ -4,15 +4,15 @@
 
 #include "core/global.h"
 #include "util/DatagramIterator.h"
-#include "dclass/value/format.h"
-#include "dclass/value/parse.h"
+#include <bamboo/dcfile/format.h>
+#include <bamboo/dcfile/parse.h>
 
 #include <yaml-cpp/yaml.h>
 #include <fstream> // std::ifstream
 #include <list>    // std::list
 
-using dclass::Class;
-using dclass::Field;
+using bamboo::Class;
+using bamboo::Field;
 using namespace std;
 
 static ConfigVariable<string> foldername("foldername", "yaml_db", db_backend_config);
@@ -120,7 +120,7 @@ class YAMLDatabase : public DatabaseBackend
 		vector<uint8_t> read_yaml_field(const Field* field, YAML::Node node, doid_t id)
 		{
 			bool error;
-			string packed_data = dclass::parse_value(field->get_type(), node.as<string>(), error);
+			vector<uint8_t> result = bamboo::parse_dcvalue(field->get_type(), node.as<string>(), error);
 			if(error)
 			{
 				m_log->error() << "Failed parsing value for field '" << field->get_name()
@@ -128,7 +128,6 @@ class YAMLDatabase : public DatabaseBackend
 				return vector<uint8_t>();
 			}
 
-			vector<uint8_t> result(packed_data.begin(), packed_data.end());
 			return result;
 		}
 
@@ -136,7 +135,7 @@ class YAMLDatabase : public DatabaseBackend
 		{
 			out << YAML::Key << field->get_name() << YAML::Value;
 			string packed_data(value.begin(), value.end());
-			out << dclass::format_value(field->get_type(), packed_data);
+			out << bamboo::format_dcvalue(field->get_type(), packed_data);
 		}
 
 		bool write_yaml_object(doid_t do_id, const Class* dcc, const ObjectData &dbo)

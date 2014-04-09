@@ -6,11 +6,11 @@
 #include "core/global.h"
 #include "core/msgtypes.h"
 #include "config/constraints.h"
-#include "dclass/dc/Class.h"
-#include "dclass/dc/Field.h"
+#include <bamboo/module/Class.h>
+#include <bamboo/module/Field.h>
 
-using dclass::Class;
-using dclass::Field;
+using bamboo::Class;
+using bamboo::Field;
 
 static ConfigVariable<bool> relocate_owned("relocate", false, ca_client_config);
 static ConfigVariable<std::string> interest_permissions("add_interest", "visible", ca_client_config);
@@ -505,7 +505,7 @@ class AstronClient : public Client, public NetworkClient
 			// If an exception occurs while unpacking data it will be handled by
 			// receive_datagram and the client will be dc'd with "truncated datagram".
 			std::vector<uint8_t> data;
-			dgi.unpack_field(field, data);
+			dgi.read_packed(field->get_type(), data);
 
 			// If an exception occurs while packing data it will be handled by
 			// receive_datagram and the client will be dc'd with "oversized datagram".

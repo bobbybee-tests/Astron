@@ -148,7 +148,7 @@ set(USE_32BIT_DATAGRAMS OFF CACHE BOOL
 	"If on, datagrams and distributed fields will use 32-bit length tags instead of 16-bit.")
 if(USE_32BIT_DATAGRAMS)
 	add_definitions(-DASTRON_32BIT_DATAGRAMS)
-	add_definitions(-DDCLASS_32BIT_SIZETAG)
+	add_definitions(-DBAMBOO_32BIT_SIZETAG)
 	find_package(Bamboo32 REQUIRED)
 	set(LIB_BAMBOO ${BAMBOO32_LIBRARIES})
 else()

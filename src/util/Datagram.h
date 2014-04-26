@@ -9,20 +9,13 @@
 #include <memory>
 #include <bamboo/wire/Datagram.h>
 using bamboo::sizetag_t;
+using bamboo::DatagramOverflow;
 
 #include "core/types.h"
 
 class Datagram; // foward declaration
 typedef std::shared_ptr<Datagram> DatagramPtr;
 typedef std::shared_ptr<const Datagram> DatagramHandle;
-
-// A DatagramOverflow is an exception which occurs when an add_<value> method is called which would
-// increase the size of the datagram past DGSIZE_MAX (preventing integer and buffer overflow).
-class DatagramOverflow : public std::runtime_error
-{
-	public:
-		DatagramOverflow(const std::string &what) : std::runtime_error(what) { }
-};
 
 // A Datagram is a buffer of binary data ready for networking (ie. formatted according to Astron's
 // over-the-wire formatting specification).  It is most often used to represent Astron client and

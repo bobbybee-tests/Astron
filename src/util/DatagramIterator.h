@@ -1,6 +1,8 @@
 #pragma once
 #include "Datagram.h"
 #include <bamboo/wire/DatagramIterator.h>
+using bamboo::DatagramIteratorEOF;
+
 #include <bamboo/module/Struct.h>
 #include <bamboo/module/Method.h>
 #include <bamboo/module/Field.h>
@@ -8,14 +10,6 @@
 #ifdef _DEBUG
 #include <fstream>
 #endif
-
-// A DatagramIteratorEOF is an exception that is thrown when attempting to read
-// past the end of a datagram.
-class DatagramIteratorEOF : public std::runtime_error
-{
-	public:
-		DatagramIteratorEOF(const std::string &what) : std::runtime_error(what) { }
-};
 
 // A DatagramIterator lets you step trough a datagram by reading a single value at a time.
 class DatagramIterator : public bamboo::DatagramIterator

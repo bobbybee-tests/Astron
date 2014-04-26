@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-#include "dclass/util/byteorder.h"
+#include <bamboo/bits/byteorder.h>
 
 struct uint128_t {
 	#if PLATFORM_BIG_ENDIAN

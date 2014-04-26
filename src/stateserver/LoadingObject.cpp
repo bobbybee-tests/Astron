@@ -5,17 +5,18 @@
 
 #include "LoadingObject.h"
 
+using namespace std;
 using bamboo::Class;
 using bamboo::Field;
 
 LoadingObject::LoadingObject(DBStateServer *stateserver, doid_t do_id,
                              doid_t parent_id, zone_t zone_id,
-                             const std::unordered_set<uint32_t> &contexts) :
+                             const unordered_set<uint32_t> &contexts) :
 	m_dbss(stateserver), m_do_id(do_id), m_parent_id(parent_id), m_zone_id(zone_id),
 	m_context(stateserver->m_next_context++), m_dclass(NULL), m_valid_contexts(contexts),
 	m_is_loaded(false)
 {
-	std::stringstream name;
+	stringstream name;
 	name << "LoadingObject(doid: " << do_id << ", db: " << m_dbss->m_db_channel << ")";
 	m_log = new LogCategory("dbobject", name.str());
 	set_con_name(name.str());
@@ -25,7 +26,7 @@ LoadingObject::LoadingObject(DBStateServer *stateserver, doid_t do_id,
 
 LoadingObject::LoadingObject(DBStateServer *stateserver, doid_t do_id, doid_t parent_id,
                              zone_t zone_id, const Class *dclass, DatagramIterator &dgi,
-                             const std::unordered_set<uint32_t> &contexts) :
+                             const unordered_set<uint32_t> &contexts) :
 	m_dbss(stateserver), m_do_id(do_id), m_parent_id(parent_id), m_zone_id(zone_id),
 	m_dclass(dclass), m_valid_contexts(contexts)
 {
@@ -135,7 +136,7 @@ void LoadingObject::handle_datagram(DatagramHandle in_dg, DatagramIterator &dgi)
 			if(!r_dclass)
 			{
 				m_log->error() << "Received object from database with unknown dclass"
-				               << " - id:" << dc_id << std::endl;
+				               << " - id:" << dc_id << endl;
 				m_dbss->discard_loader(m_do_id);
 				forward_datagrams();
 				break;
@@ -144,7 +145,7 @@ void LoadingObject::handle_datagram(DatagramHandle in_dg, DatagramIterator &dgi)
 			if(m_dclass && r_dclass != m_dclass)
 			{
 				m_log->error() << "Requested object of class '" << m_dclass->get_id()
-				               << "', but received class " << dc_id << std::endl;
+				               << "', but received class " << dc_id << endl;
 				m_dbss->discard_loader(m_do_id);
 				forward_datagrams();
 				break;
@@ -174,8 +175,8 @@ void LoadingObject::handle_datagram(DatagramHandle in_dg, DatagramIterator &dgi)
 						}
 						else if(m_required_fields.find(field) == m_required_fields.end())
 						{
-							std::string val = field->get_default_value();
-							m_required_fields[field] = std::vector<uint8_t>(val.begin(), val.end());
+							vector<uint8_t> val = field->get_default_value().pack(field->get_type());
+							m_required_fields[field] = val;
 						}
 					}
 					else if(field->has_keyword("ram"))

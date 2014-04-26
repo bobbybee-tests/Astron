@@ -126,8 +126,7 @@ void DatabaseServer::handle_datagram(DatagramHandle, DatagramIterator &dgi)
 				if(field->has_keyword("db") && !field->as_molecular()
 				        && dbo.fields.find(field) == dbo.fields.end() && field->has_default_value())
 				{
-                    string val = field->get_default_value();
-                    dbo.fields[field] = vector<uint8_t>(val.begin(), val.end());
+                    dbo.fields[field] = field->get_default_value().pack(field->get_type());
 				}
 			}
 
@@ -673,8 +672,7 @@ void DatabaseServer::handle_datagram(DatagramHandle, DatagramIterator &dgi)
 				// If field has a default, use it
 				if(field->has_default_value())
 				{
-					string str = field->get_default_value();
-					vector<uint8_t> value(str.begin(), str.end());
+					vector<uint8_t> value = field->get_default_value().pack(field->get_type());
 					/* TODO: Alternate implementation for performance compare */
 					//vector<uint8_t> value(str.length());
 					//memcpy(&value[0], str.c_str(), str.length());
@@ -755,11 +753,7 @@ void DatabaseServer::handle_datagram(DatagramHandle, DatagramIterator &dgi)
 					// If field has a default, use it
 					if(field->has_default_value())
 					{
-						string str = field->get_default_value();
-						vector<uint8_t> value(str.begin(), str.end());
-						/* Alternate implementation for performance compare */
-						//vector<uint8_t> value(str.length());
-						//memcpy(&value[0], str.c_str(), str.length());
+						vector<uint8_t> value = field->get_default_value().pack(field->get_type());
 						set_fields[field] = value;
 						m_log->trace() << "... field set to default ..." << endl;
 					}

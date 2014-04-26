@@ -424,7 +424,7 @@ class SociSQLDatabase : public DatabaseBackend
 							               << "' of object " << do_id << "' from database.\n";
 							continue;
 						}
-						stored_values[field] = vector<uint8_t>(value.begin(), value.end());
+						stored_values[field] = packed;
 					}
 				}
 

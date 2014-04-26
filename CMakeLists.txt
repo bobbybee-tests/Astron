@@ -144,29 +144,25 @@ add_definitions(
 	-D_SCL_SECURE_NO_WARNINGS
 )
 
-macro(find_package_or_config PACKAGE_NAME)
-	find_package(${PACKAGE_NAME} MODULE QUIET)
-	if(NOT ${PACKAGE_NAME}_FOUND)
-		find_package(${PACKAGE_NAME} REQUIRED CONFIG)
-	else()
-		find_package(${PACKAGE_NAME} REQUIRED)
-	endif()
-endmacro()
-
 set(USE_32BIT_DATAGRAMS OFF CACHE BOOL
 	"If on, datagrams and distributed fields will use 32-bit length tags instead of 16-bit.")
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-	set(BAMBOO_PACKAGE_MODE CONFIG)
+
+set(Bamboo_USE_STATIC_LIBS ON CACHE BOOL "If true, will try to find static Bamboo first instead of dynamic.")
+if(Bamboo_USE_STATIC_LIBS)
+	set(Bamboo32_USE_STATIC_LIBS ON)
 endif()
 
 if(USE_32BIT_DATAGRAMS)
 	add_definitions(-DASTRON_32BIT_DATAGRAMS)
 	add_definitions(-DBAMBOO_32BIT_SIZETAG)
-	find_package_or_config(Bamboo32 ${BAMBOO_PACKAGE_MODE})
-	set(LIB_BAMBOO ${BAMBOO32_LIBRARIES})
+	find_package(Bamboo32 REQUIRED)
+	message(STATUS "Found the following Bamboo library:")
+	message("  ${BAMBOO32_LIBRARIES}\n")
+	set(BAMBOO_LIBRARIES ${BAMBOO32_LIBRARIES})
 else()
-	find_package_or_config(Bamboo)
-	set(LIB_BAMBOO ${BAMBOO_LIBRARIES})
+	find_package(Bamboo REQUIRED)
+	message(STATUS "Found the following Bamboo library:")
+	message("  ${BAMBOO_LIBRARIES}\n")
 endif()
 set(USE_128BIT_CHANNELS OFF CACHE BOOL
 	"If on, channels will be 128-bit and doids and zones will be 64-bit (instead of 64/32).")
@@ -418,7 +414,7 @@ endif()
 #endforeach(sourcefile)
 #source_group("Header Files" FILES ${ASTROND_HEADERS})
 
-target_link_libraries(astrond ${LIB_BAMBOO} ${YAMLCPP_LIBNAME} ${Boost_LIBRARIES} ${SOCI_LIBRARY_NAMES})
+target_link_libraries(astrond ${BAMBOO_LIBRARIES} ${YAMLCPP_LIBNAME} ${Boost_LIBRARIES} ${SOCI_LIBRARY_NAMES})
 
 ### Handle some final testing configuration ###
 if(USE_32BIT_DATAGRAMS)

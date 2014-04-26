@@ -144,15 +144,28 @@ add_definitions(
 	-D_SCL_SECURE_NO_WARNINGS
 )
 
+macro(find_package_or_config PACKAGE_NAME)
+	find_package(${PACKAGE_NAME} MODULE QUIET)
+	if(NOT ${PACKAGE_NAME}_FOUND)
+		find_package(${PACKAGE_NAME} REQUIRED CONFIG)
+	else()
+		find_package(${PACKAGE_NAME} REQUIRED)
+	endif()
+endmacro()
+
 set(USE_32BIT_DATAGRAMS OFF CACHE BOOL
 	"If on, datagrams and distributed fields will use 32-bit length tags instead of 16-bit.")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+	set(BAMBOO_PACKAGE_MODE CONFIG)
+endif()
+
 if(USE_32BIT_DATAGRAMS)
 	add_definitions(-DASTRON_32BIT_DATAGRAMS)
 	add_definitions(-DBAMBOO_32BIT_SIZETAG)
-	find_package(Bamboo32 REQUIRED)
+	find_package_or_config(Bamboo32 ${BAMBOO_PACKAGE_MODE})
 	set(LIB_BAMBOO ${BAMBOO32_LIBRARIES})
 else()
-	find_package(Bamboo REQUIRED)
+	find_package_or_config(Bamboo)
 	set(LIB_BAMBOO ${BAMBOO_LIBRARIES})
 endif()
 set(USE_128BIT_CHANNELS OFF CACHE BOOL
@@ -161,7 +174,7 @@ if(USE_128BIT_CHANNELS)
 	add_definitions(-DASTRON_128BIT_CHANNELS)
 endif()
 
-set(BUILD_TESTS OFF CACHE BgOOL "If set to true, test files will be compiled in")
+set(BUILD_TESTS OFF CACHE BOOL "If set to true, test files will be compiled in")
 if(BUILD_TESTS)
 	set(TEST_FILES
 		src/tests/MDParticipantTest.cpp

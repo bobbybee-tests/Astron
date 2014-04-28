@@ -10,6 +10,10 @@
 #include <bamboo/wire/Datagram.h>
 using bamboo::sizetag_t;
 using bamboo::DatagramOverflow;
+using bamboo::swap_le_16;
+using bamboo::swap_le_32;
+using bamboo::swap_le_64;
+
 #ifdef ASTRON_32BIT_DATAGRAMS
 static_assert(sizeof(sizetag_t) == sizeof(int32_t),
 	"sizetag_t is not 32-bit but 32-bit was requested");

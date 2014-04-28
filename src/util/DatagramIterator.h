@@ -30,7 +30,7 @@ class DatagramIterator : public bamboo::DatagramIterator
 			check_read_length(sizeof(channel_t));
 			channel_t r = *(channel_t*)(m_dg->get_data() + m_offset);
 			m_offset += sizeof(channel_t);
-			return swap_le(r);
+			return swap_le_channel(r);
 		}
 
 		// read_doid reads a doid_t from the datagram.

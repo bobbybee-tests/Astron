@@ -10,9 +10,6 @@
 #include <bamboo/wire/Datagram.h>
 using bamboo::sizetag_t;
 using bamboo::DatagramOverflow;
-using bamboo::swap_le_16;
-using bamboo::swap_le_32;
-using bamboo::swap_le_64;
 
 #ifdef ASTRON_32BIT_DATAGRAMS
 static_assert(sizeof(sizetag_t) == sizeof(int32_t),
@@ -164,7 +161,7 @@ class Datagram : public bamboo::Datagram
 		void add_channel(const channel_t &v)
 		{
 			check_add_length(sizeof(channel_t));
-			*(channel_t *)(buf + buf_offset) = swap_le(v);
+			*(channel_t *)(buf + buf_offset) = swap_le_channel(v);
 			buf_offset += sizeof(channel_t);
 		}
 

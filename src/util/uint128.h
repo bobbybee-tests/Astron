@@ -236,6 +236,13 @@ namespace std
 	}
 }
 
+static inline uint128_t swap_le_128(uint128_t x) {
+	uint128_t result;
+	result.low = swap_le(x.high);
+	result.high = swap_le(x.low);
+	return result;
+}
+
 #ifdef ASTRON_WITH_YAML
 #  include "uint128_yaml.h"
 #endif

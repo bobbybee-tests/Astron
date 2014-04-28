@@ -8,10 +8,12 @@
 typedef uint128_t channel_t;
 typedef uint64_t doid_t;
 typedef uint64_t zone_t;
+#define swap_le_channel(c) (swap_le_128(c))
 #else
 typedef uint64_t channel_t;
 typedef uint32_t doid_t;
 typedef uint32_t zone_t;
+#define swap_le_channel(c) (swap_le(c))
 #endif
 
 /* Type limits */

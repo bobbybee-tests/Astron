@@ -1,6 +1,9 @@
 #include "ChannelMap.h"
+using namespace std;
 
 typedef boost::icl::discrete_interval<channel_t> interval_t;
+typedef boost::icl::interval_map<channel_t, set<ChannelSubscriber*> > interval_map_t;
+typedef interval_map_t::segment_type subscription_t;
 
 static void get_closed_bounds(const interval_t &interval, channel_t &lower, channel_t &upper)
 {
@@ -20,14 +23,14 @@ static void get_closed_bounds(const interval_t &interval, channel_t &lower, chan
 ChannelMap::ChannelMap()
 {
 	// Initialize m_range_susbcriptions with empty range
-	auto empty_set = std::set<ChannelSubscriber*>();
-	m_range_subscriptions = boost::icl::interval_map<channel_t, std::set<ChannelSubscriber*> >();
-	m_range_subscriptions += std::make_pair(interval_t::closed(0, CHANNEL_MAX), empty_set);
+	auto empty_set = set<ChannelSubscriber*>();
+	m_range_subscriptions = interval_map_t();
+	m_range_subscriptions += subscription_t(interval_t::closed(0, CHANNEL_MAX), empty_set);
 }
 
 void ChannelMap::subscribe_channel(ChannelSubscriber *p, channel_t c)
 {
-	std::lock_guard<std::recursive_mutex> guard(m_lock);
+	lock_guard<recursive_mutex> guard(m_lock);
 
 	if(is_subscribed(p, c))
 		return;
@@ -45,7 +48,7 @@ void ChannelMap::subscribe_channel(ChannelSubscriber *p, channel_t c)
 
 void ChannelMap::unsubscribe_channel(ChannelSubscriber *p, channel_t c)
 {
-	std::lock_guard<std::recursive_mutex> guard(m_lock);
+	lock_guard<recursive_mutex> guard(m_lock);
 
 	if(!is_subscribed(p, c))
 		return;
@@ -63,17 +66,17 @@ void ChannelMap::unsubscribe_channel(ChannelSubscriber *p, channel_t c)
 
 void ChannelMap::subscribe_range(ChannelSubscriber *p, channel_t lo, channel_t hi)
 {
-	std::lock_guard<std::recursive_mutex> guard(m_lock);
+	lock_guard<recursive_mutex> guard(m_lock);
 
 	// Prepare participant and range
-	std::set<ChannelSubscriber *> participant_set;
+	set<ChannelSubscriber *> participant_set;
 	participant_set.insert(p);
 
 	interval_t interval = interval_t::closed(lo, hi);
 
 	// Update range mappings
 	p->ranges() += interval;
-	m_range_subscriptions += std::make_pair(interval, participant_set);
+	m_range_subscriptions += subscription_t(interval, participant_set);
 
 	// Now, check if anything along this interval is *new*:
 	auto interval_range = m_range_subscriptions.equal_range(interval);
@@ -92,7 +95,7 @@ void ChannelMap::subscribe_range(ChannelSubscriber *p, channel_t lo, channel_t h
 
 void ChannelMap::unsubscribe_range(ChannelSubscriber *p, channel_t lo, channel_t hi)
 {
-	std::lock_guard<std::recursive_mutex> guard(m_lock);
+	lock_guard<recursive_mutex> guard(m_lock);
 
 	// Pre-check: if there are no ranges subscribed anyway, no use doing this:
 	if(m_range_subscriptions.empty())
@@ -101,13 +104,13 @@ void ChannelMap::unsubscribe_range(ChannelSubscriber *p, channel_t lo, channel_t
 	}
 
 	// Prepare participant set
-	std::set<ChannelSubscriber *> participant_set;
+	set<ChannelSubscriber *> participant_set;
 	participant_set.insert(p);
 
 	// Construct the interval we are removing, bounded to m_range_subscriptions.
 	channel_t lower = m_range_subscriptions.begin()->first.lower();
 	channel_t upper = m_range_subscriptions.rbegin()->first.upper();
-	interval_t interval = interval_t::closed(std::max(lo, lower), std::min(hi, upper));
+	interval_t interval = interval_t::closed(max(lo, lower), min(hi, upper));
 
 	// Calculate the ranges that will "go silent" as a result of our removal:
 	auto silent_ranges = boost::icl::interval_set<channel_t>(interval);
@@ -123,7 +126,7 @@ void ChannelMap::unsubscribe_range(ChannelSubscriber *p, channel_t lo, channel_t
 
 	// Update range mappings
 	p->ranges() -= interval;
-	m_range_subscriptions -= std::make_pair(interval, participant_set);
+	m_range_subscriptions -= subscription_t(interval, participant_set);
 
 	// Clobber *channel* subscriptions that fall within the range.
 	for(auto it = p->channels().begin(); it != p->channels().end();)
@@ -153,10 +156,10 @@ void ChannelMap::unsubscribe_range(ChannelSubscriber *p, channel_t lo, channel_t
 
 void ChannelMap::unsubscribe_all(ChannelSubscriber* p)
 {
-	std::lock_guard<std::recursive_mutex> guard(m_lock);
+	lock_guard<recursive_mutex> guard(m_lock);
 
 	// Unsubscribe from indivually subscribed channels
-	auto channels = std::set<channel_t>(p->channels());
+	auto channels = set<channel_t>(p->channels());
 	for(auto it = channels.begin(); it != channels.end(); ++it)
 	{
 		channel_t channel = *it;
@@ -176,28 +179,28 @@ void ChannelMap::unsubscribe_all(ChannelSubscriber* p)
 
 bool ChannelMap::is_subscribed(ChannelSubscriber *p, channel_t c)
 {
-	std::lock_guard<std::recursive_mutex> guard(m_lock);
+	lock_guard<recursive_mutex> guard(m_lock);
 
-	std::set<ChannelSubscriber *> pset;
+	set<ChannelSubscriber *> pset;
 	lookup_channel(c, pset);
 
 	return pset.find(p) != pset.end();
 }
 
-void ChannelMap::lookup_channel(channel_t c, std::set<ChannelSubscriber *> &ps)
+void ChannelMap::lookup_channel(channel_t c, set<ChannelSubscriber *> &ps)
 {
-	std::lock_guard<std::recursive_mutex> guard(m_lock);
+	lock_guard<recursive_mutex> guard(m_lock);
 
 	// TODO: Faster implementation.
-	std::list<channel_t> channels;
+	list<channel_t> channels;
 	channels.push_back(c);
 
 	lookup_channels(channels, ps);
 }
 
-void ChannelMap::lookup_channels(const std::list<channel_t> &cl, std::set<ChannelSubscriber *> &ps)
+void ChannelMap::lookup_channels(const list<channel_t> &cl, set<ChannelSubscriber *> &ps)
 {
-	std::lock_guard<std::recursive_mutex> guard(m_lock);
+	lock_guard<recursive_mutex> guard(m_lock);
 
 	for(auto it = cl.begin(); it != cl.end(); ++it)
 	{
